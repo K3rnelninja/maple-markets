@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeroProfit GEX — ES/NQ</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #d1d4dc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+.header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #1e222d; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 15px; font-weight: 600; color: #fff; }
+.sym-tabs { display: flex; gap: 4px; }
+.sym-tab { padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid transparent; color: #787b86; transition: all 0.2s; }
+.sym-tab.active { background: #26a69a22; color: #26a69a; border-color: #26a69a44; }
+.sym-tab:hover { color: #d1d4dc; }
+.status-badge { font-size: 11px; padding: 4px 10px; border-radius: 10px; font-weight: 500; }
+.status-live { background: rgba(38,166,154,0.2); color: #26a69a; }
+.status-stale { background: rgba(255,183,77,0.2); color: #ffb74d; }
+.status-offline { background: rgba(239,83,80,0.2); color: #ef5350; }
+
+.gex-table { position: absolute; top: 52px; right: 12px; z-index: 10; background: rgba(10,10,15,0.92); border: 1px solid #1e222d; border-radius: 8px; padding: 10px 14px; font-size: 12px; min-width: 180px; backdrop-filter: blur(8px); }
+.gex-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.gex-table-title { font-weight: 600; color: #fff; font-size: 12px; }
+.gex-regime { font-size: 11px; font-weight: 500; }
+.regime-pos { color: #26a69a; }
+.regime-neg { color: #ef5350; }
+.gex-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.gex-key { color: #787b86; }
+.gex-val { color: #d1d4dc; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+.gex-val.call { color: #26a69a; }
+.gex-val.put { color: #ef5350; }
+.gex-val.hvl { color: #ffa726; }
+.gex-updated { font-size: 10px; color: #585b70; margin-top: 6px; text-align: right; }
+
+#chart-container { width: 100%; height: calc(100vh - 48px); position: relative; }
+
+.mobile-levels { display: none; padding: 12px; }
+@media (max-width: 600px) {
+  .gex-table { display: none; }
+  .mobile-levels { display: block; }
+}
+.ml-row { display: flex; justify-content: space-between; padding: 8px 12px; margin-bottom: 4px; border-radius: 6px; font-size: 13px; }
+.ml-call { background: rgba(38,166,154,0.1); }
+.ml-hvl { background: rgba(255,183,77,0.12); }
+.ml-put { background: rgba(239,83,80,0.1); }
+.ml-name { font-weight: 500; }
+.ml-price { font-family: 'SF Mono', monospace; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="logo">ZeroProfit GEX</span>
+    <div class="sym-tabs">
+      <div class="sym-tab active" onclick="switchSymbol('es')">ES</div>
+      <div class="sym-tab" onclick="switchSymbol('nq')">NQ</div>
+    </div>
+  </div>
+  <span id="status-badge" class="status-badge status-offline">loading...</span>
+</div>
+
+<div id="chart-container">
+  <div id="gex-overlay" class="gex-table"></div>
+</div>
+
+<div id="mobile-levels" class="mobile-levels"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightweight-charts/4.1.1/lightweight-charts.standalone.production.js"></script>
+<script>
+const API_URL = '/api/gex';
+const REFRESH_MS = 30000;
+
+let currentSymbol = 'es';
+let chart = null;
+let candleSeries = null;
+let priceLines = [];
+let gexData = null;
+
+function initChart() {
+  const container = document.getElementById('chart-container');
+  chart = LightweightCharts.createChart(container, {
+    layout: { background: { color: '#0a0a0f' }, textColor: '#787b86' },
+    grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    rightPriceScale: { borderColor: '#1e222d' },
+    timeScale: { borderColor: '#1e222d', timeVisible: true },
+    width: container.clientWidth,
+    height: container.clientHeight,
+  });
+
+  candleSeries = chart.addCandlestickSeries({
+    upColor: '#26a69a', downColor: '#ef5350',
+    borderUpColor: '#26a69a', borderDownColor: '#ef5350',
+    wickUpColor: '#26a69a', wickDownColor: '#ef5350',
+  });
+
+  window.addEventListener('resize', () => {
+    chart.resize(container.clientWidth, container.clientHeight);
+  });
+
+  // Placeholder candles (will be replaced by real data when available)
+  const now = Math.floor(Date.now() / 1000);
+  const placeholder = [];
+  for (let i = 50; i >= 0; i--) {
+    const t = now - i * 300;
+    const base = 6815;
+    const o = base + (Math.random() - 0.5) * 30;
+    const c = o + (Math.random() - 0.5) * 20;
+    placeholder.push({ time: t, open: o, high: Math.max(o,c)+Math.random()*10, low: Math.min(o,c)-Math.random()*10, close: c });
+  }
+  candleSeries.setData(placeholder);
+}
+
+function clearPriceLines() {
+  priceLines.forEach(pl => candleSeries.removePriceLine(pl));
+  priceLines = [];
+}
+
+function drawGexLevels(levels) {
+  clearPriceLines();
+  if (!levels) return;
+
+  // HVL
+  if (levels.hvl) {
+    priceLines.push(candleSeries.createPriceLine({
+      price: levels.hvl, color: '#ffa726', lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true, title: 'HVL ' + levels.hvl.toFixed(0),
+    }));
+  }
+
+  // Call walls
+  const callColors = ['#26a69a', '#26a69a99', '#26a69a66'];
+  (levels.call_walls || []).forEach((w, i) => {
+    priceLines.push(candleSeries.createPriceLine({
+      price: w, color: callColors[i] || '#26a69a',
+      lineWidth: i === 0 ? 2 : 1,
+      lineStyle: LightweightCharts.LineStyle.Dotted,
+      axisLabelVisible: true, title: 'C' + (i+1) + ' ' + w.toFixed(0),
+    }));
+  });
+
+  // Put walls
+  const putColors = ['#ef5350', '#ef535099', '#ef535066'];
+  (levels.put_walls || []).forEach((w, i) => {
+    priceLines.push(candleSeries.createPriceLine({
+      price: w, color: putColors[i] || '#ef5350',
+      lineWidth: i === 0 ? 2 : 1,
+      lineStyle: LightweightCharts.LineStyle.Dotted,
+      axisLabelVisible: true, title: 'P' + (i+1) + ' ' + w.toFixed(0),
+    }));
+  });
+
+  // Max pain
+  if (levels.max_pain) {
+    priceLines.push(candleSeries.createPriceLine({
+      price: levels.max_pain, color: '#ffeb3b66',
+      lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted,
+      axisLabelVisible: false, title: 'MaxP',
+    }));
+  }
+}
+
+function updateOverlay(levels, data) {
+  if (!levels) return;
+  const regime = levels.regime || 'unknown';
+  const regimeClass = regime === 'positive' ? 'regime-pos' : 'regime-neg';
+  const regimeIcon = regime === 'positive' ? '●' : '●';
+
+  document.getElementById('gex-overlay').innerHTML = `
+    <div class="gex-table-header">
+      <span class="gex-table-title">ZeroProfit GEX</span>
+      <span class="gex-regime ${regimeClass}">${regimeIcon} ${regime.toUpperCase()} γ</span>
+    </div>
+    <div class="gex-row"><span class="gex-key">HVL</span><span class="gex-val hvl">${fmt(levels.hvl)}</span></div>
+    <div class="gex-row"><span class="gex-key">Call wall</span><span class="gex-val call">${fmt((levels.call_walls||[])[0])}</span></div>
+    <div class="gex-row"><span class="gex-key">Put wall</span><span class="gex-val put">${fmt((levels.put_walls||[])[0])}</span></div>
+    <div class="gex-row"><span class="gex-key">Max pain</span><span class="gex-val">${fmt(levels.max_pain)}</span></div>
+    <div class="gex-updated">src: ${data.source || '?'} · ${timeAgo(data.updated_at)}</div>
+  `;
+
+  // Mobile levels
+  const ml = document.getElementById('mobile-levels');
+  let html = '';
+  (levels.call_walls || []).forEach((w,i) => {
+    html += `<div class="ml-row ml-call"><span class="ml-name" style="color:#4db6ac">Call ${i+1}</span><span class="ml-price" style="color:#26a69a">${fmt(w)}</span></div>`;
+  });
+  html += `<div class="ml-row ml-hvl"><span class="ml-name" style="color:#ffb74d">HVL</span><span class="ml-price" style="color:#ffa726">${fmt(levels.hvl)}</span></div>`;
+  (levels.put_walls || []).forEach((w,i) => {
+    html += `<div class="ml-row ml-put"><span class="ml-name" style="color:#ef9a9a">Put ${i+1}</span><span class="ml-price" style="color:#ef5350">${fmt(w)}</span></div>`;
+  });
+  ml.innerHTML = html;
+}
+
+function updateStatusBadge(data) {
+  const badge = document.getElementById('status-badge');
+  if (!data || data.error) {
+    badge.className = 'status-badge status-offline';
+    badge.textContent = 'no data';
+  } else if (data.stale) {
+    badge.className = 'status-badge status-stale';
+    badge.textContent = '● Stale · ' + timeAgo(data.updated_at);
+  } else {
+    badge.className = 'status-badge status-live';
+    badge.textContent = '● Live · ' + timeAgo(data.updated_at);
+  }
+}
+
+function switchSymbol(sym) {
+  currentSymbol = sym;
+  document.querySelectorAll('.sym-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.sym-tab[onclick*="${sym}"]`).classList.add('active');
+  if (gexData) {
+    const levels = gexData[sym];
+    drawGexLevels(levels);
+    updateOverlay(levels, gexData);
+  }
+}
+
+async function fetchGex() {
+  try {
+    const resp = await fetch(API_URL);
+    const data = await resp.json();
+    gexData = data;
+    const levels = data[currentSymbol];
+    drawGexLevels(levels);
+    updateOverlay(levels, data);
+    updateStatusBadge(data);
+  } catch(e) {
+    console.error('GEX fetch error:', e);
+    updateStatusBadge(null);
+  }
+}
+
+function fmt(v) {
+  if (v == null) return '—';
+  return v.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function timeAgo(iso) {
+  if (!iso) return '?';
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return Math.round(diff) + 's ago';
+  if (diff < 3600) return Math.round(diff/60) + 'm ago';
+  if (diff < 86400) return Math.round(diff/3600) + 'h ago';
+  return Math.round(diff/86400) + 'd ago';
+}
+
+// ── Init ──
+initChart();
+fetchGex();
+setInterval(fetchGex, REFRESH_MS);
+</script>
+</body>
+</html>

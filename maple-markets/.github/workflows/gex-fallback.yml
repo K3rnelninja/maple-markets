@@ -1,0 +1,37 @@
+name: GEX Fallback (FlashAlpha)
+
+on:
+  schedule:
+    # 5 runs during US market hours (ET → UTC)
+    # Pre-market:  9:25 AM ET = 13:25 UTC
+    # Mid-morning: 10:30 AM ET = 14:30 UTC
+    # Midday:      12:00 PM ET = 16:00 UTC
+    # Afternoon:   2:00 PM ET  = 18:00 UTC
+    # Pre-close:   3:50 PM ET  = 19:50 UTC
+    - cron: '25 13 * * 1-5'
+    - cron: '30 14 * * 1-5'
+    - cron: '0 16 * * 1-5'
+    - cron: '0 18 * * 1-5'
+    - cron: '50 19 * * 1-5'
+  workflow_dispatch: # manual trigger for testing
+
+jobs:
+  gex-fallback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run FlashAlpha GEX fallback
+        env:
+          FLASHALPHA_API_KEY: ${{ secrets.FLASHALPHA_API_KEY }}
+          RENDER_URL: ${{ secrets.RENDER_URL }}
+          GEX_PUSH_KEY: ${{ secrets.GEX_PUSH_KEY }}
+        run: python -m gex.flashalpha_fallback
