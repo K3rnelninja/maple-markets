@@ -69,3 +69,4 @@ python -m gex.moomoo_relay
 ## Future modules
 - `/api/signals` — VectorVest-style day/swing scoring with TP/SL
 - `/api/rrsp` — Dividend portfolio tracker ($50/mo CAD)
+
