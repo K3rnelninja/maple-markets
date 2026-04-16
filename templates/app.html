@@ -164,8 +164,11 @@ canvas{display:block;width:100%;border-radius:8px}
 
 <script>
 // ── State ──────────────────────────────────────────────────────────
-let STATE = { trades:[], stats:null, gex:null, tab:'chart' };
+let STATE = { trades:[], stats:null, gex:null, tab:'chart', price:0, priceChange:0, priceChangePct:0, vix:0, vixRegime:'--', candles:[] };
 const API = '';  // same origin
+
+// Yahoo Finance CORS proxy — fetched client-side from user's phone (residential IP, not blocked)
+const YF_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 
 // ── Tab Switching ──────────────────────────────────────────────────
 function switchTab(tab) {
@@ -184,8 +187,51 @@ async function fetchData() {
     ]);
     STATE.trades = (await tradesRes.json()).trades;
     STATE.stats = await statsRes.json();
-    render();
-  } catch(e) { console.error('Fetch error:', e); }
+  } catch(e) { console.log('Backend fetch error:', e); }
+  
+  // Fetch live market data client-side from Yahoo
+  await fetchLiveMarketData();
+  render();
+}
+
+async function fetchLiveMarketData() {
+  try {
+    // ES futures
+    const esRes = await fetch(YF_BASE + 'ES=F?interval=5m&range=1d');
+    const esData = await esRes.json();
+    if (esData.chart && esData.chart.result && esData.chart.result[0]) {
+      const r = esData.chart.result[0];
+      const meta = r.meta;
+      STATE.price = meta.regularMarketPrice || 0;
+      const prevClose = meta.chartPreviousClose || meta.previousClose || STATE.price;
+      STATE.priceChange = STATE.price - prevClose;
+      STATE.priceChangePct = prevClose > 0 ? (STATE.priceChange / prevClose) * 100 : 0;
+      
+      // Extract candle data
+      if (r.timestamp && r.indicators && r.indicators.quote && r.indicators.quote[0]) {
+        const q = r.indicators.quote[0];
+        const ts = r.timestamp;
+        STATE.candles = [];
+        for (let i = 0; i < ts.length; i++) {
+          if (q.open[i] != null && q.close[i] != null) {
+            STATE.candles.push({
+              o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], t: ts[i]
+            });
+          }
+        }
+      }
+    }
+  } catch(e) { console.log('ES fetch error:', e); }
+  
+  try {
+    // VIX
+    const vixRes = await fetch(YF_BASE + '%5EVIX?interval=1d&range=1d');
+    const vixData = await vixRes.json();
+    if (vixData.chart && vixData.chart.result && vixData.chart.result[0]) {
+      STATE.vix = vixData.chart.result[0].meta.regularMarketPrice || 0;
+      STATE.vixRegime = STATE.vix < 15 ? 'LOW VOL' : STATE.vix > 25 ? 'HIGH VOL' : 'MODERATE';
+    }
+  } catch(e) { console.log('VIX fetch error:', e); }
 }
 
 // ── Render Functions ───────────────────────────────────────────────
@@ -193,31 +239,79 @@ function render() {
   const s = STATE.stats;
   if (!s) return;
   document.getElementById('subtitle').textContent = `ES · 5min · ${new Date().toLocaleDateString()}`;
+  
+  // Update VIX badge
+  const vixColor = STATE.vix < 15 ? '--green' : STATE.vix > 25 ? '--red' : '--gold';
+  const vixBadge = document.getElementById('vix-badge');
+  const vixDot = vixBadge.querySelector('.vix-dot');
+  vixBadge.style.background = `var(${vixColor})12`;
+  vixBadge.style.borderColor = `var(${vixColor})33`;
+  vixDot.style.background = `var(${vixColor})`;
+  vixDot.style.boxShadow = `0 0 6px var(${vixColor})`;
+  document.getElementById('vix-text').textContent = STATE.vix > 0 ? `VIX ${STATE.vix.toFixed(1)}` : 'VIX --';
+  document.getElementById('vix-text').style.color = `var(${vixColor})`;
+  document.getElementById('vix-regime').textContent = STATE.vixRegime;
+  
   renderChart(); renderSignals(); renderTrades(); renderStats();
 }
 
 function renderChart() {
   const el = document.getElementById('page-chart');
-  const candles = generateCandles(60);
-  const lastPrice = candles[candles.length-1].c;
+  const candles = STATE.candles.length > 0 ? STATE.candles : generateCandles(60);
+  const lastPrice = STATE.price > 0 ? STATE.price : (candles.length > 0 ? candles[candles.length-1].c : 0);
+  const change = STATE.priceChange;
+  const changePct = STATE.priceChangePct;
+  const changeColor = change >= 0 ? 'var(--green)' : 'var(--red)';
+  const changeSign = change >= 0 ? '+' : '';
+  
+  // Compute BGL (21 EMA) from live candles
+  let bglVal = 0;
+  if (candles.length > 0) {
+    const k = 2/22;
+    let ema = candles[0].c;
+    for (let i=1;i<candles.length;i++) ema = candles[i].c*k + ema*(1-k);
+    bglVal = ema;
+  }
+  
+  // Compute VWAP approximation (simple average of hlc3)
+  let vwapVal = 0;
+  if (candles.length > 0) {
+    let sumPV = 0, sumV = 0;
+    candles.forEach(c => { const tp=(c.h+c.l+c.c)/3; sumPV+=tp; sumV+=1; });
+    vwapVal = sumPV/sumV;
+  }
+  
+  // Determine ORB (first 6 candles = 30min on 5min chart)
+  let orbHigh = 0, orbLow = 999999;
+  const orbBars = Math.min(6, candles.length);
+  for (let i=0;i<orbBars;i++) { orbHigh=Math.max(orbHigh,candles[i].h); orbLow=Math.min(orbLow,candles[i].l); }
+  
+  const priceAboveBGL = lastPrice > bglVal;
+  const bglSignal = priceAboveBGL ? 'LONG' : 'SHORT';
+  const bglConf = priceAboveBGL ? (lastPrice-bglVal > 5 ? 72 : 55) : (bglVal-lastPrice > 5 ? 72 : 55);
+  const bglDesc = priceAboveBGL ? 'Price above 21 EMA · Trending up' : 'Price below 21 EMA · Trending down';
+  
+  const isLive = STATE.candles.length > 0;
+  
   el.innerHTML = `
     <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
       <span class="price-big mono">${lastPrice.toFixed(2)}</span>
-      <span class="price-change mono" style="color:var(--green)">+12.50 (+0.18%)</span>
+      <span class="price-change mono" style="color:${changeColor}">${changeSign}${change.toFixed(2)} (${changeSign}${changePct.toFixed(2)}%)</span>
     </div>
+    ${!isLive ? '<div style="font-size:9px;color:var(--gold);margin-bottom:4px" class="mono">⏳ Market closed — showing last session</div>' : ''}
     <div class="card" style="padding:0;overflow:hidden">
       <canvas id="chart-canvas" height="220"></canvas>
     </div>
     <div style="display:flex;flex-wrap:wrap;margin:12px 0">
-      ${indBadge('BGL 21','6,812.4','--bgl')}
-      ${indBadge('ORB High','6,825.0','--blue')}
-      ${indBadge('ORB Low','6,790.5','--purple')}
-      ${indBadge('VWAP','6,808.2','--gold')}
+      ${indBadge('BGL 21', bglVal.toFixed(1), '--bgl')}
+      ${indBadge('ORB High', orbHigh.toFixed(1), '--blue')}
+      ${indBadge('ORB Low', orbLow > 99999 ? '--' : orbLow.toFixed(1), '--purple')}
+      ${indBadge('VWAP', vwapVal.toFixed(1), '--gold')}
     </div>
     <div class="section-title mono">ACTIVE STRATEGIES</div>
-    ${signalCard('Black ASP v1.1.0','SHORT',65,'ES @ 6801 · SL: 6814 · TP: 6792',true)}
-    ${signalCard('BGL Trend','SHORT',72,'Price below 21 EMA · Trending down',true)}
-    ${signalCard('ORB Breakout',null,null,'Waiting for 9:30-10:00 range to form',false)}
+    ${signalCard('Black ASP v1.1.0', bglSignal==='SHORT'?'SHORT':'LONG', 65, 'ES @ '+lastPrice.toFixed(1)+' · VIX: '+STATE.vix.toFixed(1)+' '+STATE.vixRegime, true)}
+    ${signalCard('BGL Trend', bglSignal, bglConf, bglDesc, true)}
+    ${signalCard('ORB Breakout', lastPrice>orbHigh?'LONG':lastPrice<orbLow?'SHORT':null, lastPrice>orbHigh||lastPrice<orbLow?60:null, lastPrice>orbHigh?'Price above ORB high '+orbHigh.toFixed(1):lastPrice<orbLow?'Price below ORB low '+orbLow.toFixed(1):'Waiting — price inside opening range', lastPrice>orbHigh||lastPrice<orbLow)}
   `;
   drawCandlestickChart('chart-canvas', candles, 220);
 }
