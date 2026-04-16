@@ -6,6 +6,7 @@ GitHub: K3rnelninja/maple-markets
 import os
 import json
 import time
+import requests as req_lib
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request, render_template, send_from_directory
 
@@ -71,7 +72,76 @@ def service_worker():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "version": "2.0.0", "updated_at": _gex_store["updated_at"]})
+    return jsonify({"status": "ok", "version": "2.1.0", "updated_at": _gex_store["updated_at"]})
+
+# ── Market Data Proxy (Yahoo Finance) ───────────────────────────────
+# Cached to avoid hammering Yahoo — refreshes every 60s
+_market_cache = {"data": None, "fetched_at": 0}
+CACHE_TTL = 60  # seconds
+
+@app.route("/api/market")
+def get_market():
+    now = time.time()
+    if _market_cache["data"] and (now - _market_cache["fetched_at"]) < CACHE_TTL:
+        return jsonify(_market_cache["data"])
+    
+    result = {"es": {}, "vix": {}, "live": False, "fetched_at": None, "error": None}
+    headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
+    
+    try:
+        # ES Futures
+        es_url = "https://query1.finance.yahoo.com/v8/finance/chart/ES=F?interval=5m&range=1d"
+        es_resp = req_lib.get(es_url, headers=headers, timeout=8)
+        es_json = es_resp.json()
+        if es_json.get("chart", {}).get("result"):
+            r = es_json["chart"]["result"][0]
+            meta = r.get("meta", {})
+            price = meta.get("regularMarketPrice", 0)
+            prev = meta.get("chartPreviousClose", meta.get("previousClose", price))
+            
+            candles = []
+            if r.get("timestamp") and r.get("indicators", {}).get("quote"):
+                q = r["indicators"]["quote"][0]
+                ts = r["timestamp"]
+                for i in range(len(ts)):
+                    if q["open"][i] is not None and q["close"][i] is not None:
+                        candles.append({
+                            "o": round(q["open"][i], 2),
+                            "h": round(q["high"][i], 2),
+                            "l": round(q["low"][i], 2),
+                            "c": round(q["close"][i], 2),
+                            "t": ts[i]
+                        })
+            
+            result["es"] = {
+                "price": price,
+                "change": round(price - prev, 2),
+                "changePct": round((price - prev) / prev * 100, 2) if prev else 0,
+                "candles": candles
+            }
+            result["live"] = True
+    except Exception as e:
+        result["error"] = f"ES: {str(e)}"
+    
+    try:
+        # VIX
+        vix_url = "https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=2d"
+        vix_resp = req_lib.get(vix_url, headers=headers, timeout=8)
+        vix_json = vix_resp.json()
+        if vix_json.get("chart", {}).get("result"):
+            vix_val = vix_json["chart"]["result"][0]["meta"].get("regularMarketPrice", 0)
+            regime = "LOW VOL" if vix_val < 15 else ("HIGH VOL" if vix_val > 25 else "MODERATE")
+            result["vix"] = {"value": round(vix_val, 2), "regime": regime}
+    except Exception as e:
+        if result["error"]:
+            result["error"] += f" | VIX: {str(e)}"
+        else:
+            result["error"] = f"VIX: {str(e)}"
+    
+    result["fetched_at"] = datetime.now(timezone.utc).isoformat()
+    _market_cache["data"] = result
+    _market_cache["fetched_at"] = now
+    return jsonify(result)
 
 # ── Trade API ───────────────────────────────────────────────────────
 @app.route("/api/trades")

@@ -164,11 +164,8 @@ canvas{display:block;width:100%;border-radius:8px}
 
 <script>
 // ── State ──────────────────────────────────────────────────────────
-let STATE = { trades:[], stats:null, gex:null, tab:'chart', price:0, priceChange:0, priceChangePct:0, vix:0, vixRegime:'--', candles:[] };
+let STATE = { trades:[], stats:null, gex:null, tab:'chart', price:0, priceChange:0, priceChangePct:0, vix:0, vixRegime:'--', candles:[], live:false, lastFetch:null, error:null };
 const API = '';  // same origin
-
-// Yahoo Finance CORS proxy — fetched client-side from user's phone (residential IP, not blocked)
-const YF_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
 
 // ── Tab Switching ──────────────────────────────────────────────────
 function switchTab(tab) {
@@ -182,63 +179,43 @@ function switchTab(tab) {
 // ── Data Fetching ──────────────────────────────────────────────────
 async function fetchData() {
   try {
-    const [tradesRes, statsRes] = await Promise.all([
-      fetch(API+'/api/trades'), fetch(API+'/api/stats')
+    const [tradesRes, statsRes, marketRes] = await Promise.all([
+      fetch(API+'/api/trades'), fetch(API+'/api/stats'), fetch(API+'/api/market')
     ]);
     STATE.trades = (await tradesRes.json()).trades;
     STATE.stats = await statsRes.json();
-  } catch(e) { console.log('Backend fetch error:', e); }
-  
-  // Fetch live market data client-side from Yahoo
-  await fetchLiveMarketData();
+    
+    const market = await marketRes.json();
+    if (market.es && market.es.price) {
+      STATE.price = market.es.price;
+      STATE.priceChange = market.es.change || 0;
+      STATE.priceChangePct = market.es.changePct || 0;
+      STATE.candles = market.es.candles || [];
+    }
+    if (market.vix && market.vix.value) {
+      STATE.vix = market.vix.value;
+      STATE.vixRegime = market.vix.regime || '--';
+    }
+    STATE.live = market.live || false;
+    STATE.lastFetch = market.fetched_at;
+    STATE.error = market.error;
+  } catch(e) { 
+    console.log('Fetch error:', e);
+    STATE.live = false;
+    STATE.error = e.toString();
+  }
   render();
-}
-
-async function fetchLiveMarketData() {
-  try {
-    // ES futures
-    const esRes = await fetch(YF_BASE + 'ES=F?interval=5m&range=1d');
-    const esData = await esRes.json();
-    if (esData.chart && esData.chart.result && esData.chart.result[0]) {
-      const r = esData.chart.result[0];
-      const meta = r.meta;
-      STATE.price = meta.regularMarketPrice || 0;
-      const prevClose = meta.chartPreviousClose || meta.previousClose || STATE.price;
-      STATE.priceChange = STATE.price - prevClose;
-      STATE.priceChangePct = prevClose > 0 ? (STATE.priceChange / prevClose) * 100 : 0;
-      
-      // Extract candle data
-      if (r.timestamp && r.indicators && r.indicators.quote && r.indicators.quote[0]) {
-        const q = r.indicators.quote[0];
-        const ts = r.timestamp;
-        STATE.candles = [];
-        for (let i = 0; i < ts.length; i++) {
-          if (q.open[i] != null && q.close[i] != null) {
-            STATE.candles.push({
-              o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], t: ts[i]
-            });
-          }
-        }
-      }
-    }
-  } catch(e) { console.log('ES fetch error:', e); }
-  
-  try {
-    // VIX
-    const vixRes = await fetch(YF_BASE + '%5EVIX?interval=1d&range=1d');
-    const vixData = await vixRes.json();
-    if (vixData.chart && vixData.chart.result && vixData.chart.result[0]) {
-      STATE.vix = vixData.chart.result[0].meta.regularMarketPrice || 0;
-      STATE.vixRegime = STATE.vix < 15 ? 'LOW VOL' : STATE.vix > 25 ? 'HIGH VOL' : 'MODERATE';
-    }
-  } catch(e) { console.log('VIX fetch error:', e); }
 }
 
 // ── Render Functions ───────────────────────────────────────────────
 function render() {
   const s = STATE.stats;
   if (!s) return;
-  document.getElementById('subtitle').textContent = `ES · 5min · ${new Date().toLocaleDateString()}`;
+  
+  // Update subtitle with live/dead status
+  const statusDot = STATE.live ? '🟢' : '🔴';
+  const statusText = STATE.live ? 'LIVE' : 'OFFLINE';
+  document.getElementById('subtitle').textContent = `ES · 5min · ${statusDot} ${statusText} · ${new Date().toLocaleDateString()}`;
   
   // Update VIX badge
   const vixColor = STATE.vix < 15 ? '--green' : STATE.vix > 25 ? '--red' : '--gold';
