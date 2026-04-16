@@ -1,6 +1,7 @@
 """
-maple-markets v2.0 — Trading Dashboard + API
-Render deployment: maple-markets.onrender.com
+maple-markets v3.0 — 5-Tab Trading Dashboard
+Day Trade / Swing / RRSP / Trades / Stats
+Render: maple-markets.onrender.com
 GitHub: K3rnelninja/maple-markets
 """
 import os
@@ -11,6 +12,23 @@ from datetime import datetime, timezone
 from flask import Flask, jsonify, request, render_template, send_from_directory
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+
+# ── Persistent store (survives restarts via file) ──────────────────
+STORE_FILE = os.environ.get("STORE_FILE", "/tmp/maple_store.json")
+
+def load_store():
+    try:
+        with open(STORE_FILE, "r") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def save_store(data):
+    try:
+        with open(STORE_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"save_store error: {e}")
 
 # ── In-memory stores ────────────────────────────────────────────────
 _gex_store = {"es": None, "nq": None, "updated_at": None, "source": None}
@@ -42,6 +60,55 @@ _trades_store = [
     {"id":24,"date":"04/13","dir":"SHORT","entry":6806,"exit":6809.75,"pnl":-188.5},
     {"id":25,"date":"04/14","dir":"LONG","entry":6936,"exit":6932.75,"pnl":-163.5},
 ]
+
+# ── RRSP Portfolio — Canadian + US Dividend Stocks ──────────────────
+# US stocks in RRSP avoid 15% withholding tax (IRS recognizes RRSP)
+_rrsp_default = [
+    # Canadian Holdings
+    {"id":1,"ticker":"ENB.TO","name":"Enbridge","country":"CA","sector":"Pipeline","yield":6.1,"growth":3,"shares":2,"avgCost":54.20,"price":58.75,"divPerShare":3.35,"rating":"HOLD","note":"51yr dividend streak, 6%+ yield, energy infrastructure backbone"},
+    {"id":2,"ticker":"BNS.TO","name":"Scotiabank","country":"CA","sector":"Bank","yield":5.8,"growth":5,"shares":1,"avgCost":68.50,"price":72.30,"divPerShare":4.24,"rating":"BUY","note":"Big 5 bank, international growth via LatAm, 5.8% yield"},
+    {"id":3,"ticker":"FTS.TO","name":"Fortis","country":"CA","sector":"Utility","yield":3.3,"growth":5,"shares":2,"avgCost":56.80,"price":61.20,"divPerShare":2.39,"rating":"BUY","note":"52yr consecutive dividend raises, 4-6% annual growth through 2030"},
+    {"id":4,"ticker":"BAM.TO","name":"Brookfield AM","country":"CA","sector":"Alt Assets","yield":3.2,"growth":15,"shares":1,"avgCost":65.00,"price":71.80,"divPerShare":1.72,"rating":"BUY","note":"AI infrastructure + renewables, plans to double in 5yrs"},
+    # US Holdings (in RRSP — no 15% withholding)
+    {"id":5,"ticker":"JNJ","name":"Johnson & Johnson","country":"US","sector":"Healthcare","yield":3.1,"growth":6,"shares":1,"avgCost":152.00,"price":158.40,"divPerShare":4.96,"rating":"BUY","note":"Dividend King, 60+yr streak, defensive healthcare"},
+    {"id":6,"ticker":"PG","name":"Procter & Gamble","country":"US","sector":"Consumer Staples","yield":2.4,"growth":6,"shares":1,"avgCost":158.00,"price":168.20,"divPerShare":4.03,"rating":"HOLD","note":"Dividend King 68yrs, household brands, recession-proof"},
+    {"id":7,"ticker":"KO","name":"Coca-Cola","country":"US","sector":"Consumer Staples","yield":2.9,"growth":5,"shares":2,"avgCost":68.00,"price":72.15,"divPerShare":2.08,"rating":"BUY","note":"Dividend King 62yrs, global brand moat, stable cash flows"},
+    {"id":8,"ticker":"MSFT","name":"Microsoft","country":"US","sector":"Technology","yield":0.7,"growth":10,"shares":1,"avgCost":395.00,"price":432.50,"divPerShare":3.00,"rating":"BUY","note":"AI leader, cloud growth, 20yr div growth, 10% raises"},
+]
+
+_rrsp_meta_default = {
+    "monthlyContribution": 50,
+    "currency": "CAD",
+    "targetAge": 65,
+    "yearsToTarget": 25,
+    "lastContribution": "2026-04-01"
+}
+
+# ── Swing Watchlist ─────────────────────────────────────────────────
+_swing_default = [
+    {"ticker":"SPY","name":"S&P 500 ETF","price":697.42,"signal":"LONG","score":72,"trend":"BULL","tp":710,"sl":688,"rr":"2.1:1","note":"Above 21/50 EMA, ORB breakout confirmed"},
+    {"ticker":"QQQ","name":"Nasdaq 100 ETF","price":596.80,"signal":"LONG","score":68,"trend":"BULL","tp":615,"sl":585,"rr":"1.6:1","note":"Tech leading, above VWAP, positive momentum"},
+    {"ticker":"AAPL","name":"Apple","price":212.50,"signal":"HOLD","score":55,"trend":"MIXED","tp":220,"sl":205,"rr":"1.0:1","note":"Consolidating at resistance, wait for breakout"},
+    {"ticker":"NVDA","name":"Nvidia","price":118.30,"signal":"LONG","score":78,"trend":"BULL","tp":130,"sl":112,"rr":"1.9:1","note":"AI capex cycle, strong momentum, above all MAs"},
+    {"ticker":"TSLA","name":"Tesla","price":285.60,"signal":"SHORT","score":62,"trend":"BEAR","tp":260,"sl":298,"rr":"2.1:1","note":"Below 50 EMA, tariff headwinds, fading momentum"},
+    {"ticker":"AMD","name":"AMD","price":108.40,"signal":"LONG","score":70,"trend":"BULL","tp":118,"sl":102,"rr":"1.5:1","note":"MI400 catalyst, data center growth, above 21 EMA"},
+    {"ticker":"AMZN","name":"Amazon","price":198.20,"signal":"HOLD","score":52,"trend":"MIXED","tp":210,"sl":190,"rr":"1.5:1","note":"Cloud strong, retail mixed, at 200 EMA support"},
+    {"ticker":"META","name":"Meta","price":582.10,"signal":"LONG","score":74,"trend":"BULL","tp":610,"sl":565,"rr":"1.6:1","note":"AI monetization, strong engagement, above BGL"},
+]
+
+# Load persisted state if it exists
+_saved = load_store()
+if _saved:
+    _rrsp_store = _saved.get("rrsp", _rrsp_default)
+    _rrsp_meta = _saved.get("rrsp_meta", _rrsp_meta_default)
+    _swing_store = _saved.get("swing", _swing_default)
+else:
+    _rrsp_store = _rrsp_default
+    _rrsp_meta = _rrsp_meta_default
+    _swing_store = _swing_default
+
+def persist():
+    save_store({"rrsp": _rrsp_store, "rrsp_meta": _rrsp_meta, "swing": _swing_store})
 
 PUSH_KEY = os.environ.get("GEX_PUSH_KEY", "dev-key")
 
@@ -236,6 +303,130 @@ def push_gex():
     _gex_store["nq"] = data.get("nq")
     _gex_store["updated_at"] = data.get("updated_at", datetime.now(timezone.utc).isoformat())
     _gex_store["source"] = data.get("source", "unknown")
+    return jsonify({"ok": True})
+
+# ── RRSP API ────────────────────────────────────────────────────────
+@app.route("/api/rrsp")
+def get_rrsp():
+    total_value = sum(h["price"] * h["shares"] for h in _rrsp_store)
+    total_cost = sum(h["avgCost"] * h["shares"] for h in _rrsp_store)
+    total_gain = total_value - total_cost
+    annual_div = sum(h["divPerShare"] * h["shares"] for h in _rrsp_store)
+    avg_yield = (annual_div / total_value * 100) if total_value > 0 else 0
+    
+    # 25-year projection: monthly contribution + 8% growth + DRIP
+    monthly = _rrsp_meta.get("monthlyContribution", 50)
+    years = _rrsp_meta.get("yearsToTarget", 25)
+    monthly_return = 0.08 / 12
+    projected = total_value
+    for _ in range(years * 12):
+        projected = (projected + monthly) * (1 + monthly_return)
+    
+    # Split by country
+    ca_holdings = [h for h in _rrsp_store if h.get("country") == "CA"]
+    us_holdings = [h for h in _rrsp_store if h.get("country") == "US"]
+    ca_value = sum(h["price"] * h["shares"] for h in ca_holdings)
+    us_value = sum(h["price"] * h["shares"] for h in us_holdings)
+    
+    return jsonify({
+        "holdings": _rrsp_store,
+        "meta": _rrsp_meta,
+        "summary": {
+            "total_value": round(total_value, 2),
+            "total_cost": round(total_cost, 2),
+            "total_gain": round(total_gain, 2),
+            "total_gain_pct": round((total_gain / total_cost * 100) if total_cost > 0 else 0, 2),
+            "annual_dividend": round(annual_div, 2),
+            "avg_yield": round(avg_yield, 2),
+            "projected_25yr": round(projected, 0),
+            "ca_value": round(ca_value, 2),
+            "us_value": round(us_value, 2),
+            "ca_pct": round((ca_value / total_value * 100) if total_value > 0 else 0, 1),
+            "us_pct": round((us_value / total_value * 100) if total_value > 0 else 0, 1),
+        }
+    })
+
+@app.route("/api/rrsp/holding", methods=["POST"])
+def add_or_update_holding():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "no data"}), 400
+    
+    hid = data.get("id")
+    if hid:
+        # Update existing
+        for i, h in enumerate(_rrsp_store):
+            if h["id"] == hid:
+                _rrsp_store[i] = {**h, **data}
+                persist()
+                return jsonify({"ok": True, "holding": _rrsp_store[i]})
+        return jsonify({"error": "not found"}), 404
+    else:
+        # Add new
+        new_id = max([h["id"] for h in _rrsp_store], default=0) + 1
+        new_holding = {
+            "id": new_id,
+            "ticker": data.get("ticker", ""),
+            "name": data.get("name", ""),
+            "country": data.get("country", "CA"),
+            "sector": data.get("sector", ""),
+            "yield": float(data.get("yield", 0)),
+            "growth": float(data.get("growth", 0)),
+            "shares": float(data.get("shares", 0)),
+            "avgCost": float(data.get("avgCost", 0)),
+            "price": float(data.get("price", 0)),
+            "divPerShare": float(data.get("divPerShare", 0)),
+            "rating": data.get("rating", "HOLD"),
+            "note": data.get("note", "")
+        }
+        _rrsp_store.append(new_holding)
+        persist()
+        return jsonify({"ok": True, "holding": new_holding})
+
+@app.route("/api/rrsp/holding/<int:hid>", methods=["DELETE"])
+def delete_holding(hid):
+    global _rrsp_store
+    _rrsp_store = [h for h in _rrsp_store if h["id"] != hid]
+    persist()
+    return jsonify({"ok": True})
+
+@app.route("/api/rrsp/meta", methods=["POST"])
+def update_rrsp_meta():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "no data"}), 400
+    global _rrsp_meta
+    _rrsp_meta = {**_rrsp_meta, **data}
+    persist()
+    return jsonify({"ok": True, "meta": _rrsp_meta})
+
+# ── Swing Watchlist API ─────────────────────────────────────────────
+@app.route("/api/swing")
+def get_swing():
+    return jsonify({"watchlist": _swing_store})
+
+@app.route("/api/swing/ticker", methods=["POST"])
+def add_or_update_swing():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "no data"}), 400
+    ticker = data.get("ticker", "").upper()
+    if not ticker:
+        return jsonify({"error": "ticker required"}), 400
+    for i, t in enumerate(_swing_store):
+        if t["ticker"] == ticker:
+            _swing_store[i] = {**t, **data, "ticker": ticker}
+            persist()
+            return jsonify({"ok": True, "ticker": _swing_store[i]})
+    _swing_store.append({**data, "ticker": ticker})
+    persist()
+    return jsonify({"ok": True, "ticker": data})
+
+@app.route("/api/swing/ticker/<ticker>", methods=["DELETE"])
+def delete_swing(ticker):
+    global _swing_store
+    _swing_store = [t for t in _swing_store if t["ticker"] != ticker.upper()]
+    persist()
     return jsonify({"ok": True})
 
 # ── Old chart route (kept for backward compat) ─────────────────────

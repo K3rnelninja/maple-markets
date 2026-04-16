@@ -17,45 +17,31 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display',system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-.mono{font-family:'SF Mono',SFMono-Regular,'Cascadia Code',Menlo,monospace}
+.mono{font-family:'SF Mono',SFMono-Regular,Menlo,monospace}
 .app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
-
-/* Header */
 .header{padding:env(safe-area-inset-top,12px) 20px 8px;position:sticky;top:0;z-index:10;background:var(--bg)}
 .header-row{display:flex;justify-content:space-between;align-items:center}
-.brand{display:flex;gap:8px;align-items:center}
 .brand-maple{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:3px}
 .brand-markets{font-size:11px;font-weight:300;color:var(--dim);letter-spacing:3px}
 .subtitle{font-size:9px;color:var(--dim);margin-top:2px}
-
-/* VIX Badge */
-.vix-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-size:10px}
+.vix-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-size:10px;border:1px solid}
 .vix-dot{width:6px;height:6px;border-radius:3px}
-
-/* Tabs */
 .tab-bar{display:flex;padding:6px 0 env(safe-area-inset-bottom,20px);background:#08080d;border-top:1px solid var(--border);position:sticky;bottom:0;z-index:10}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:opacity .2s;opacity:.4;border:none;background:none;color:var(--dim);padding:4px 0}
 .tab.active{opacity:1;color:var(--accent)}
-.tab svg{width:20px;height:20px}
+.tab-icon{font-size:18px}
 .tab-label{font-size:9px;font-weight:400}
 .tab.active .tab-label{font-weight:700}
-
-/* Content */
 .content{flex:1;overflow-y:auto;padding:0 16px 16px;-webkit-overflow-scrolling:touch}
 .page{display:none}.page.active{display:block}
-
-/* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;flex:1;min-width:0}
 .stat-label{font-size:10px;color:var(--dim);margin-bottom:2px}
-.stat-value{font-size:20px;font-weight:700}
+.stat-value{font-size:18px;font-weight:700}
 .stat-sub{font-size:9px;color:var(--dim);margin-top:1px}
-.row{display:flex;gap:6px}
-.section-title{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:1px;margin:12px 0 8px}
-
-/* Signal Card */
+.row{display:flex;gap:6px;margin-bottom:8px}
+.section-title{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:1px;margin:12px 0 8px;display:flex;justify-content:space-between;align-items:center}
 .signal{position:relative;overflow:hidden}
-.signal.active{border-color:rgba(255,255,255,.1)}
 .signal-bar{position:absolute;top:0;left:0;right:0;height:2px}
 .signal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .signal-name{font-size:13px;font-weight:600}
@@ -63,68 +49,53 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Di
 .signal-desc{font-size:10px;color:var(--dim);margin-bottom:4px}
 .conf-bar-bg{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
 .conf-bar-fill{height:100%;border-radius:2px}
-
-/* Trade Row */
 .trade-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);gap:8px}
 .trade-row:last-child{border-bottom:none}
 .trade-idx{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
 .trade-dir{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
-.trade-date{font-size:10px;color:var(--dim)}
-.trade-levels{font-size:9px;color:var(--muted);margin-top:2px}
-.trade-pnl{font-size:13px;font-weight:700;text-align:right}
-
-/* Confluence box */
+.price-big{font-size:28px;font-weight:700;margin-bottom:4px}
+.price-change{font-size:12px;margin-left:8px}
+canvas{display:block;width:100%;border-radius:8px}
+.ind-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:6px;margin:0 4px 4px 0}
+.ind-dot{width:4px;height:4px;border-radius:2px}
 .confluence-box{border-radius:12px;padding:14px;margin-top:8px}
 .confluence-title{font-size:11px;font-weight:700;margin-bottom:4px}
 .confluence-desc{font-size:10px;color:var(--dim);line-height:1.5}
-
-/* Win rate ring */
-.ring-container{position:relative;width:80px;height:80px;flex-shrink:0}
-.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-pct{font-size:18px;font-weight:700}
-.ring-label{font-size:8px;color:var(--dim)}
-
-/* Weekly row */
 .weekly-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
 .weekly-row:last-child{border-bottom:none}
-.weekly-name{font-size:10px}
-.weekly-detail{font-size:9px;color:var(--dim)}
-.weekly-pnl{font-size:12px;font-weight:700}
-
-/* Indicator badge */
-.ind-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:6px;margin:0 4px 4px 0}
-.ind-dot{width:4px;height:4px;border-radius:2px}
-.ind-label{font-size:9px;color:var(--dim)}
-.ind-value{font-size:9px;font-weight:600}
-
-/* Insight box */
+.ring-container{position:relative;width:80px;height:80px;flex-shrink:0}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .insight{border-radius:12px;padding:12px;margin-top:12px}
-.insight-title{font-size:10px;font-weight:700;margin-bottom:4px}
-.insight-text{font-size:10px;color:var(--dim);line-height:1.5}
-
-/* Price display */
-.price-big{font-size:28px;font-weight:700;margin-bottom:8px}
-.price-change{font-size:12px;margin-left:8px}
-
-/* Canvas charts */
-canvas{display:block;width:100%;border-radius:8px}
-
-/* Loading */
-.loading{text-align:center;padding:40px;color:var(--dim);font-size:12px}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-.loading::after{content:'';display:block;width:20px;height:20px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;margin:12px auto;animation:pulse .8s infinite}
+.filter-btn{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--dim);font-size:10px;font-weight:600;font-family:'SF Mono',monospace;cursor:pointer;margin-right:6px}
+.filter-btn.active{background:rgba(230,57,70,.2);color:var(--accent);border-color:var(--accent)}
+.flag{font-size:8px;color:var(--muted);margin-left:4px;background:rgba(107,107,128,.2);padding:1px 4px;border-radius:3px;font-family:'SF Mono',monospace}
+.btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:10px;font-family:'SF Mono',monospace;cursor:pointer;font-weight:600}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:white}
+.btn-danger{background:transparent;border-color:var(--red);color:var(--red)}
+.btn-sm{padding:3px 8px;font-size:9px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal.show{display:flex}
+.modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.form-group{margin-bottom:12px}
+.form-label{font-size:10px;color:var(--dim);margin-bottom:4px;display:block;font-family:'SF Mono',monospace}
+.form-input,.form-select{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:'SF Mono',monospace}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--accent)}
+.form-row{display:flex;gap:8px}
+.form-row .form-group{flex:1}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-actions .btn{flex:1;padding:10px}
 </style>
 </head>
 <body>
 <div class="app">
-<!-- Header -->
 <div class="header">
 <div class="header-row">
 <div>
-<div class="brand mono"><span class="brand-maple">MAPLE</span><span class="brand-markets">MARKETS</span></div>
+<div class="mono"><span class="brand-maple">MAPLE</span>&nbsp;<span class="brand-markets">MARKETS</span></div>
 <div class="subtitle mono" id="subtitle">ES · 5min · Loading...</div>
 </div>
-<div class="vix-badge mono" id="vix-badge" style="background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.2)">
+<div class="vix-badge mono" id="vix-badge" style="background:rgba(241,196,15,.08);border-color:rgba(241,196,15,.2)">
 <div class="vix-dot" style="background:var(--gold);box-shadow:0 0 6px var(--gold)"></div>
 <span id="vix-text" style="color:var(--gold);font-weight:600">VIX --</span>
 <span style="color:var(--dim)">·</span>
@@ -133,41 +104,102 @@ canvas{display:block;width:100%;border-radius:8px}
 </div>
 </div>
 
-<!-- Content -->
 <div class="content">
-<div class="page active" id="page-chart"></div>
-<div class="page" id="page-signals"></div>
+<div class="page active" id="page-daytrade"></div>
+<div class="page" id="page-swing"></div>
+<div class="page" id="page-rrsp"></div>
 <div class="page" id="page-trades"></div>
 <div class="page" id="page-stats"></div>
 </div>
 
-<!-- Tab Bar -->
 <div class="tab-bar">
-<button class="tab active" data-tab="chart" onclick="switchTab('chart')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
-<span class="tab-label mono">Chart</span>
-</button>
-<button class="tab" data-tab="signals" onclick="switchTab('signals')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-<span class="tab-label mono">Signals</span>
-</button>
-<button class="tab" data-tab="trades" onclick="switchTab('trades')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
-<span class="tab-label mono">Trades</span>
-</button>
-<button class="tab" data-tab="stats" onclick="switchTab('stats')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
-<span class="tab-label mono">Stats</span>
-</button>
+<button class="tab active" data-tab="daytrade" onclick="switchTab('daytrade')"><span class="tab-icon">⚡</span><span class="tab-label mono">Day Trade</span></button>
+<button class="tab" data-tab="swing" onclick="switchTab('swing')"><span class="tab-icon">🔄</span><span class="tab-label mono">Swing</span></button>
+<button class="tab" data-tab="rrsp" onclick="switchTab('rrsp')"><span class="tab-icon">🍁</span><span class="tab-label mono">RRSP</span></button>
+<button class="tab" data-tab="trades" onclick="switchTab('trades')"><span class="tab-icon">📋</span><span class="tab-label mono">Trades</span></button>
+<button class="tab" data-tab="stats" onclick="switchTab('stats')"><span class="tab-icon">📈</span><span class="tab-label mono">Stats</span></button>
+</div>
+</div>
+
+<!-- RRSP Edit Modal -->
+<div class="modal" id="rrsp-modal">
+<div class="modal-content">
+<div class="modal-title" id="rrsp-modal-title">Add Holding</div>
+<input type="hidden" id="rrsp-id">
+<div class="form-row">
+<div class="form-group"><label class="form-label">TICKER</label><input class="form-input" id="rrsp-ticker"></div>
+<div class="form-group"><label class="form-label">COUNTRY</label><select class="form-select" id="rrsp-country"><option value="CA">🇨🇦 CA</option><option value="US">🇺🇸 US</option></select></div>
+</div>
+<div class="form-group"><label class="form-label">COMPANY NAME</label><input class="form-input" id="rrsp-name"></div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">SECTOR</label><input class="form-input" id="rrsp-sector"></div>
+<div class="form-group"><label class="form-label">RATING</label><select class="form-select" id="rrsp-rating"><option>BUY</option><option>HOLD</option><option>SELL</option></select></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">SHARES</label><input class="form-input" id="rrsp-shares" type="number" step="0.01"></div>
+<div class="form-group"><label class="form-label">AVG COST</label><input class="form-input" id="rrsp-avgCost" type="number" step="0.01"></div>
+<div class="form-group"><label class="form-label">PRICE</label><input class="form-input" id="rrsp-price" type="number" step="0.01"></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">YIELD %</label><input class="form-input" id="rrsp-yield" type="number" step="0.01"></div>
+<div class="form-group"><label class="form-label">GROWTH %</label><input class="form-input" id="rrsp-growth" type="number" step="0.1"></div>
+<div class="form-group"><label class="form-label">DIV/SHARE</label><input class="form-input" id="rrsp-divPerShare" type="number" step="0.01"></div>
+</div>
+<div class="form-group"><label class="form-label">NOTE</label><input class="form-input" id="rrsp-note"></div>
+<div class="modal-actions">
+<button class="btn" onclick="closeModal('rrsp-modal')">Cancel</button>
+<button class="btn btn-danger" id="rrsp-delete-btn" onclick="deleteHolding()">Delete</button>
+<button class="btn btn-primary" onclick="saveRrsp()">Save</button>
+</div>
+</div>
+</div>
+
+<!-- RRSP Meta Modal -->
+<div class="modal" id="rrsp-meta-modal">
+<div class="modal-content">
+<div class="modal-title">Account Settings</div>
+<div class="form-group"><label class="form-label">MONTHLY CONTRIBUTION (CAD)</label><input class="form-input" id="meta-monthly" type="number" step="1"></div>
+<div class="form-group"><label class="form-label">TARGET AGE</label><input class="form-input" id="meta-age" type="number" step="1"></div>
+<div class="form-group"><label class="form-label">YEARS TO TARGET</label><input class="form-input" id="meta-years" type="number" step="1"></div>
+<div class="modal-actions">
+<button class="btn" onclick="closeModal('rrsp-meta-modal')">Cancel</button>
+<button class="btn btn-primary" onclick="saveMeta()">Save</button>
+</div>
+</div>
+</div>
+
+<!-- Swing Edit Modal -->
+<div class="modal" id="swing-modal">
+<div class="modal-content">
+<div class="modal-title" id="swing-modal-title">Add Ticker</div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">TICKER</label><input class="form-input" id="swing-ticker"></div>
+<div class="form-group"><label class="form-label">SIGNAL</label><select class="form-select" id="swing-signal"><option>LONG</option><option>SHORT</option><option>HOLD</option></select></div>
+</div>
+<div class="form-group"><label class="form-label">COMPANY NAME</label><input class="form-input" id="swing-name"></div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">PRICE</label><input class="form-input" id="swing-price" type="number" step="0.01"></div>
+<div class="form-group"><label class="form-label">SCORE /100</label><input class="form-input" id="swing-score" type="number" step="1"></div>
+<div class="form-group"><label class="form-label">TREND</label><select class="form-select" id="swing-trend"><option>BULL</option><option>BEAR</option><option>MIXED</option></select></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">TP</label><input class="form-input" id="swing-tp" type="number" step="0.01"></div>
+<div class="form-group"><label class="form-label">SL</label><input class="form-input" id="swing-sl" type="number" step="0.01"></div>
+<div class="form-group"><label class="form-label">R:R</label><input class="form-input" id="swing-rr"></div>
+</div>
+<div class="form-group"><label class="form-label">NOTE</label><input class="form-input" id="swing-note"></div>
+<div class="modal-actions">
+<button class="btn" onclick="closeModal('swing-modal')">Cancel</button>
+<button class="btn btn-danger" id="swing-delete-btn" onclick="deleteSwing()">Delete</button>
+<button class="btn btn-primary" onclick="saveSwing()">Save</button>
+</div>
 </div>
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────
-let STATE = { trades:[], stats:null, gex:null, tab:'chart', price:0, priceChange:0, priceChangePct:0, vix:0, vixRegime:'--', candles:[], live:false, lastFetch:null, error:null };
-const API = '';  // same origin
+let STATE = { trades:[], stats:null, rrsp:null, swing:[], tab:'daytrade', price:0, priceChange:0, priceChangePct:0, vix:0, vixRegime:'--', candles:[], live:false, swingFilter:'ALL', editingTicker:null };
+const API = '';
 
-// ── Tab Switching ──────────────────────────────────────────────────
 function switchTab(tab) {
   STATE.tab = tab;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -176,16 +208,15 @@ function switchTab(tab) {
   document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
 }
 
-// ── Data Fetching ──────────────────────────────────────────────────
 async function fetchData() {
   try {
-    const [tradesRes, statsRes, marketRes] = await Promise.all([
-      fetch(API+'/api/trades'), fetch(API+'/api/stats'), fetch(API+'/api/market')
+    const [tr, st, mk, rr, sw] = await Promise.all([
+      fetch(API+'/api/trades'), fetch(API+'/api/stats'), fetch(API+'/api/market'),
+      fetch(API+'/api/rrsp'), fetch(API+'/api/swing')
     ]);
-    STATE.trades = (await tradesRes.json()).trades;
-    STATE.stats = await statsRes.json();
-    
-    const market = await marketRes.json();
+    STATE.trades = (await tr.json()).trades;
+    STATE.stats = await st.json();
+    const market = await mk.json();
     if (market.es && market.es.price) {
       STATE.price = market.es.price;
       STATE.priceChange = market.es.change || 0;
@@ -197,114 +228,187 @@ async function fetchData() {
       STATE.vixRegime = market.vix.regime || '--';
     }
     STATE.live = market.live || false;
-    STATE.lastFetch = market.fetched_at;
-    STATE.error = market.error;
-  } catch(e) { 
-    console.log('Fetch error:', e);
-    STATE.live = false;
-    STATE.error = e.toString();
-  }
+    STATE.rrsp = await rr.json();
+    STATE.swing = (await sw.json()).watchlist || [];
+  } catch(e) { console.log('Fetch error:', e); }
   render();
 }
 
-// ── Render Functions ───────────────────────────────────────────────
 function render() {
-  const s = STATE.stats;
-  if (!s) return;
-  
-  // Update subtitle with live/dead status
-  const statusDot = STATE.live ? '🟢' : '🔴';
-  const statusText = STATE.live ? 'LIVE' : 'OFFLINE';
-  document.getElementById('subtitle').textContent = `ES · 5min · ${statusDot} ${statusText} · ${new Date().toLocaleDateString()}`;
-  
-  // Update VIX badge
-  const vixColor = STATE.vix < 15 ? '--green' : STATE.vix > 25 ? '--red' : '--gold';
-  const vixBadge = document.getElementById('vix-badge');
-  const vixDot = vixBadge.querySelector('.vix-dot');
-  vixBadge.style.background = `var(${vixColor})12`;
-  vixBadge.style.borderColor = `var(${vixColor})33`;
-  vixDot.style.background = `var(${vixColor})`;
-  vixDot.style.boxShadow = `0 0 6px var(${vixColor})`;
+  if (!STATE.stats) return;
+  const status = STATE.live ? '🟢 LIVE' : '🔴 OFFLINE';
+  document.getElementById('subtitle').textContent = `ES · 5min · ${status} · ${new Date().toLocaleDateString()}`;
+  const vc = STATE.vix < 15 ? '--green' : STATE.vix > 25 ? '--red' : '--gold';
+  const vb = document.getElementById('vix-badge');
+  vb.style.background = `var(${vc})12`;
+  vb.style.borderColor = `var(${vc})33`;
+  vb.querySelector('.vix-dot').style.background = `var(${vc})`;
+  vb.querySelector('.vix-dot').style.boxShadow = `0 0 6px var(${vc})`;
   document.getElementById('vix-text').textContent = STATE.vix > 0 ? `VIX ${STATE.vix.toFixed(1)}` : 'VIX --';
-  document.getElementById('vix-text').style.color = `var(${vixColor})`;
+  document.getElementById('vix-text').style.color = `var(${vc})`;
   document.getElementById('vix-regime').textContent = STATE.vixRegime;
-  
-  renderChart(); renderSignals(); renderTrades(); renderStats();
+  renderDayTrade(); renderSwing(); renderRrsp(); renderTrades(); renderStats();
 }
 
-function renderChart() {
-  const el = document.getElementById('page-chart');
+function renderDayTrade() {
+  const el = document.getElementById('page-daytrade');
   const candles = STATE.candles.length > 0 ? STATE.candles : generateCandles(60);
-  const lastPrice = STATE.price > 0 ? STATE.price : (candles.length > 0 ? candles[candles.length-1].c : 0);
-  const change = STATE.priceChange;
-  const changePct = STATE.priceChangePct;
-  const changeColor = change >= 0 ? 'var(--green)' : 'var(--red)';
-  const changeSign = change >= 0 ? '+' : '';
-  
-  // Compute BGL (21 EMA) from live candles
-  let bglVal = 0;
-  if (candles.length > 0) {
-    const k = 2/22;
-    let ema = candles[0].c;
-    for (let i=1;i<candles.length;i++) ema = candles[i].c*k + ema*(1-k);
-    bglVal = ema;
-  }
-  
-  // Compute VWAP approximation (simple average of hlc3)
-  let vwapVal = 0;
-  if (candles.length > 0) {
-    let sumPV = 0, sumV = 0;
-    candles.forEach(c => { const tp=(c.h+c.l+c.c)/3; sumPV+=tp; sumV+=1; });
-    vwapVal = sumPV/sumV;
-  }
-  
-  // Determine ORB (first 6 candles = 30min on 5min chart)
-  let orbHigh = 0, orbLow = 999999;
-  const orbBars = Math.min(6, candles.length);
-  for (let i=0;i<orbBars;i++) { orbHigh=Math.max(orbHigh,candles[i].h); orbLow=Math.min(orbLow,candles[i].l); }
-  
-  const priceAboveBGL = lastPrice > bglVal;
-  const bglSignal = priceAboveBGL ? 'LONG' : 'SHORT';
-  const bglConf = priceAboveBGL ? (lastPrice-bglVal > 5 ? 72 : 55) : (bglVal-lastPrice > 5 ? 72 : 55);
-  const bglDesc = priceAboveBGL ? 'Price above 21 EMA · Trending up' : 'Price below 21 EMA · Trending down';
-  
-  const isLive = STATE.candles.length > 0;
-  
+  const price = STATE.price > 0 ? STATE.price : candles[candles.length-1].c;
+  const k=2/22; let ema=candles[0].c;
+  for(let i=1;i<candles.length;i++) ema = candles[i].c*k + ema*(1-k);
+  const bgl = ema;
+  let orbH=0, orbL=999999;
+  for(let i=0;i<Math.min(6,candles.length);i++){ orbH=Math.max(orbH,candles[i].h); orbL=Math.min(orbL,candles[i].l); }
+  let sumTP=0; candles.forEach(c=>sumTP+=(c.h+c.l+c.c)/3); const vwap=sumTP/candles.length;
+  const above = price > bgl;
+  const bglSig = above ? 'LONG' : 'SHORT';
+  const bglConf = above ? (price-bgl>5?72:55) : (bgl-price>5?72:55);
+  const orbSig = price>orbH?'LONG':price<orbL?'SHORT':null;
+  const orbConf = orbSig?60:null;
+  let confLong=0, confShort=0;
+  if (STATE.vixRegime === 'MODERATE' || STATE.vixRegime === 'HIGH VOL') { confLong++; confShort++; }
+  if (above) confLong++; else confShort++;
+  if (price > orbH) confLong++;
+  if (price < orbL) confShort++;
+  const bestDir = confLong >= confShort ? 'BULLISH' : 'BEARISH';
+  const bestConf = Math.max(confLong, confShort);
+  const bestColor = bestConf>=3?'--green':bestConf>=2?'--gold':'--red';
+  const change = STATE.priceChange, pct = STATE.priceChangePct;
+  const chColor = change>=0?'var(--green)':'var(--red)';
+  const chSign = change>=0?'+':'';
   el.innerHTML = `
-    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
-      <span class="price-big mono">${lastPrice.toFixed(2)}</span>
-      <span class="price-change mono" style="color:${changeColor}">${changeSign}${change.toFixed(2)} (${changeSign}${changePct.toFixed(2)}%)</span>
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+      <span class="price-big mono">${price.toFixed(2)}</span>
+      <span class="price-change mono" style="color:${chColor}">${chSign}${change.toFixed(2)} (${chSign}${pct.toFixed(2)}%)</span>
     </div>
-    ${!isLive ? '<div style="font-size:9px;color:var(--gold);margin-bottom:4px" class="mono">⏳ Market closed — showing last session</div>' : ''}
-    <div class="card" style="padding:0;overflow:hidden">
-      <canvas id="chart-canvas" height="220"></canvas>
-    </div>
+    <div style="font-size:9px;color:var(--dim);font-family:monospace;margin-bottom:8px">Confluence: ${bestDir} ${bestConf}/4</div>
+    <div class="card" style="padding:0;overflow:hidden"><canvas id="chart-canvas" height="220"></canvas></div>
     <div style="display:flex;flex-wrap:wrap;margin:12px 0">
-      ${indBadge('BGL 21', bglVal.toFixed(1), '--bgl')}
-      ${indBadge('ORB High', orbHigh.toFixed(1), '--blue')}
-      ${indBadge('ORB Low', orbLow > 99999 ? '--' : orbLow.toFixed(1), '--purple')}
-      ${indBadge('VWAP', vwapVal.toFixed(1), '--gold')}
+      ${indBadge('BGL 21', bgl.toFixed(1), '--bgl')}
+      ${indBadge('ORB Hi', orbH.toFixed(1), '--blue')}
+      ${indBadge('ORB Lo', orbL>99999?'--':orbL.toFixed(1), '--purple')}
+      ${indBadge('VWAP', vwap.toFixed(1), '--gold')}
     </div>
-    <div class="section-title mono">ACTIVE STRATEGIES</div>
-    ${signalCard('Black ASP v1.1.0', bglSignal==='SHORT'?'SHORT':'LONG', 65, 'ES @ '+lastPrice.toFixed(1)+' · VIX: '+STATE.vix.toFixed(1)+' '+STATE.vixRegime, true)}
-    ${signalCard('BGL Trend', bglSignal, bglConf, bglDesc, true)}
-    ${signalCard('ORB Breakout', lastPrice>orbHigh?'LONG':lastPrice<orbLow?'SHORT':null, lastPrice>orbHigh||lastPrice<orbLow?60:null, lastPrice>orbHigh?'Price above ORB high '+orbHigh.toFixed(1):lastPrice<orbLow?'Price below ORB low '+orbLow.toFixed(1):'Waiting — price inside opening range', lastPrice>orbHigh||lastPrice<orbLow)}
+    <div class="section-title mono"><span>STRATEGY SIGNALS</span></div>
+    ${signalCard('Black ASP v1.1.0', bglSig, 65, `ES @ ${price.toFixed(1)} · VIX: ${STATE.vix.toFixed(1)} ${STATE.vixRegime}`, true)}
+    ${signalCard('BGL (21 EMA)', bglSig, bglConf, above?'Price above BGL · Trending up':'Price below BGL · Trending down', true)}
+    ${signalCard('ORB Breakout', orbSig, orbConf, orbSig?`Price ${orbSig==='LONG'?'above':'below'} ORB ${orbSig==='LONG'?'high '+orbH.toFixed(1):'low '+orbL.toFixed(1)}`:'Waiting — inside opening range', !!orbSig)}
+    ${signalCard('VIX Regime', null, null, `VIX ${STATE.vix.toFixed(1)} = ${STATE.vixRegime} · Trend trades valid`, false)}
+    <div class="confluence-box" style="background:var(${bestColor})0a;border:1px solid var(${bestColor})30">
+      <div class="confluence-title mono" style="color:var(${bestColor})">CONFLUENCE: ${bestDir} (${bestConf}/4)</div>
+      <div class="confluence-desc">${bestConf>=3?'High conviction — multiple strategies aligned.':bestConf>=2?'Moderate confluence — wait for confirmation.':'Low confluence — stand aside or reduce size.'}</div>
+    </div>
   `;
   drawCandlestickChart('chart-canvas', candles, 220);
 }
 
-function renderSignals() {
-  const el = document.getElementById('page-signals');
+function renderSwing() {
+  const el = document.getElementById('page-swing');
+  const filtered = STATE.swingFilter === 'ALL' ? STATE.swing : STATE.swing.filter(s => s.signal === STATE.swingFilter);
   el.innerHTML = `
-    <div class="section-title mono">STRATEGY SIGNALS</div>
-    ${signalCard('Black ASP v1.1.0','SHORT',65,'ES short entry @ 6801 · Institutional Activity TIER 1 detected',true)}
-    ${signalCard('BGL (21 EMA)','SHORT',72,'Price crossed below BGL from prev close · Entry pts: 3',true)}
-    ${signalCard('VIX Regime Filter',null,null,'VIX 22.4 = MODERATE · Trend trades valid · Normal stops',false)}
-    ${signalCard('0DTE ORB (60min)','LONG',58,'SPY broke above opening range high @ 541.20 · ATM call',true)}
-    ${signalCard('Credit Spread (0DTE)',null,null,'No setup · Need 0.2% min opening range for entry',false)}
-    <div class="confluence-box" style="background:rgba(231,76,60,.06);border:1px solid rgba(231,76,60,.2)">
-      <div class="confluence-title mono" style="color:var(--red)">CONFLUENCE: BEARISH (2/3)</div>
-      <div class="confluence-desc">Black ASP + BGL agree on SHORT. ORB disagrees. VIX moderate — trend trades preferred over breakouts.</div>
+    <div class="section-title mono">
+      <span>SWING SCANNER</span>
+      <button class="btn btn-sm btn-primary" onclick="openSwingModal()">+ Add</button>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:10px">VectorVest-style scoring · Tap any card to edit</div>
+    <div style="margin-bottom:12px">
+      ${['ALL','LONG','SHORT','HOLD'].map(f=>`<button class="filter-btn ${STATE.swingFilter===f?'active':''}" onclick="setSwingFilter('${f}')">${f}</button>`).join('')}
+    </div>
+    ${filtered.map(s => {
+      const sc = s.signal==='LONG'?'--green':s.signal==='SHORT'?'--red':'--gold';
+      return `<div class="card" onclick="openSwingModal('${s.ticker}')" style="cursor:pointer">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div><span style="font-size:14px;font-weight:700" class="mono">${s.ticker}</span><span style="font-size:10px;color:var(--dim);margin-left:8px">${s.name||''}</span></div>
+          <div style="text-align:right"><div style="font-size:14px;font-weight:700" class="mono">$${Number(s.price).toFixed(2)}</div>
+          <span class="signal-badge mono" style="color:var(${sc});background:var(${sc})18">${s.signal}</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          <div class="mono" style="font-size:9px;color:var(--dim)">Score: <span style="color:var(${sc});font-weight:700">${s.score}/100</span></div>
+          <div class="mono" style="font-size:9px;color:var(--dim)">Trend: <span style="color:${s.trend==='BULL'?'var(--green)':s.trend==='BEAR'?'var(--red)':'var(--gold)'}">${s.trend}</span></div>
+          <div class="mono" style="font-size:9px;color:var(--dim)">R:R: <span style="color:var(--text)">${s.rr||'--'}</span></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:4px">
+          <span class="mono" style="font-size:9px;color:var(--green)">TP: $${s.tp}</span>
+          <span class="mono" style="font-size:9px;color:var(--red)">SL: $${s.sl}</span>
+        </div>
+        <div style="font-size:9px;color:var(--muted)">${s.note||''}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <div class="conf-bar-bg"><div class="conf-bar-fill" style="width:${s.score}%;background:var(${sc})"></div></div>
+        </div>
+      </div>`;
+    }).join('')}
+    <div class="card" style="background:rgba(52,152,219,.08);border-color:rgba(52,152,219,.2)">
+      <div class="mono" style="font-size:10px;font-weight:700;color:var(--blue);margin-bottom:4px">SCAN CRITERIA</div>
+      <div style="font-size:9px;color:var(--dim);line-height:1.6">Price vs 21 & 50 EMA · RSI 40-70 · Volume &gt; 20-day avg · ATR 1-3x normal · Min 1.5:1 R:R · Daily + weekly trend alignment</div>
+    </div>
+  `;
+}
+
+function setSwingFilter(f) { STATE.swingFilter = f; renderSwing(); }
+
+function renderRrsp() {
+  const el = document.getElementById('page-rrsp');
+  if (!STATE.rrsp) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--dim)">Loading...</div>'; return; }
+  const s = STATE.rrsp.summary, m = STATE.rrsp.meta, h = STATE.rrsp.holdings;
+  const caH = h.filter(x => x.country === 'CA');
+  const usH = h.filter(x => x.country === 'US');
+  const holdingRow = (x) => {
+    const gain = (x.price - x.avgCost) * x.shares;
+    const rc = x.rating==='BUY'?'--green':x.rating==='SELL'?'--red':'--gold';
+    return `<div class="card" onclick="openRrspModal(${x.id})" style="cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div><span style="font-size:13px;font-weight:700" class="mono">${x.ticker}</span>
+        <span style="font-size:10px;color:var(--dim);margin-left:6px">${x.name}</span>
+        <span class="flag">${x.country==='CA'?'🇨🇦':'🇺🇸'} ${x.country}</span>
+        <span class="flag">${x.sector}</span></div>
+        <span class="signal-badge mono" style="color:var(${rc});background:var(${rc})18">${x.rating}</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+        <span class="mono" style="font-size:9px;color:var(--dim)">Sh: <span style="color:var(--text)">${x.shares}</span></span>
+        <span class="mono" style="font-size:9px;color:var(--dim)">Avg: <span style="color:var(--text)">$${Number(x.avgCost).toFixed(2)}</span></span>
+        <span class="mono" style="font-size:9px;color:var(--dim)">Now: <span style="color:var(--text)">$${Number(x.price).toFixed(2)}</span></span>
+        <span class="mono" style="font-size:9px;color:${gain>=0?'var(--green)':'var(--red)'}">${gain>=0?'+':''}$${gain.toFixed(0)}</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:4px">
+        <span class="mono" style="font-size:9px;color:var(--green)">Yield: ${x.yield}%</span>
+        <span class="mono" style="font-size:9px;color:var(--dim)">Growth: ${x.growth}%/yr</span>
+        <span class="mono" style="font-size:9px;color:var(--gold)">$/yr: $${(x.divPerShare * x.shares).toFixed(2)}</span>
+      </div>
+      <div style="font-size:9px;color:var(--muted)">${x.note||''}</div>
+    </div>`;
+  };
+  el.innerHTML = `
+    <div class="section-title mono">
+      <span>RRSP DIVIDEND PORTFOLIO</span>
+      <div><button class="btn btn-sm" onclick="openMetaModal()">⚙</button> <button class="btn btn-sm btn-primary" onclick="openRrspModal()">+ Add</button></div>
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:10px" class="mono">$${m.monthlyContribution} CAD/mo · ${m.yearsToTarget}yr → Age ${m.targetAge}</div>
+    <div class="row">
+      <div class="stat-card"><div class="stat-label mono">PORTFOLIO</div><div class="stat-value mono">$${s.total_value.toFixed(0)}</div>
+      <div class="stat-sub mono" style="color:${s.total_gain>=0?'var(--green)':'var(--red)'}">${s.total_gain>=0?'+':''}$${s.total_gain.toFixed(0)} (${s.total_gain_pct.toFixed(1)}%)</div></div>
+      <div class="stat-card"><div class="stat-label mono">ANNUAL DIV</div><div class="stat-value mono" style="color:var(--green)">$${s.annual_dividend.toFixed(0)}</div>
+      <div class="stat-sub mono" style="color:var(--gold)">Yield: ${s.avg_yield.toFixed(1)}%</div></div>
+      <div class="stat-card"><div class="stat-label mono">${m.yearsToTarget}YR PROJ</div><div class="stat-value mono" style="color:var(--gold)">$${(s.projected_25yr/1000).toFixed(0)}K</div>
+      <div class="stat-sub mono">@ 8% + DRIP</div></div>
+    </div>
+    <div class="row">
+      <div class="stat-card"><div class="stat-label mono">🇨🇦 CANADA</div><div class="stat-value mono" style="color:var(--red);font-size:15px">$${s.ca_value.toFixed(0)}</div><div class="stat-sub mono">${s.ca_pct}% of port</div></div>
+      <div class="stat-card"><div class="stat-label mono">🇺🇸 US</div><div class="stat-value mono" style="color:var(--blue);font-size:15px">$${s.us_value.toFixed(0)}</div><div class="stat-sub mono">${s.us_pct}% · No withholding</div></div>
+    </div>
+    <div class="card" style="background:rgba(46,204,113,.08);border-color:rgba(46,204,113,.2)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="mono" style="font-size:10px;font-weight:700;color:var(--green)">MONTHLY CONTRIBUTION</div>
+        <div style="font-size:9px;color:var(--dim)">Auto-invest into most underweight</div></div>
+        <div class="mono" style="font-size:20px;font-weight:700;color:var(--green)">$${m.monthlyContribution}</div>
+      </div>
+    </div>
+    <div class="section-title mono" style="margin-top:12px">🇨🇦 CANADIAN HOLDINGS (${caH.length})</div>
+    ${caH.map(holdingRow).join('')}
+    <div class="section-title mono" style="margin-top:12px">🇺🇸 US HOLDINGS (${usH.length})</div>
+    ${usH.map(holdingRow).join('')}
+    <div class="card" style="background:rgba(241,196,15,.05);border-color:rgba(241,196,15,.2);margin-top:12px">
+      <div class="mono" style="font-size:10px;font-weight:700;color:var(--gold);margin-bottom:4px">STRATEGY</div>
+      <div style="font-size:9px;color:var(--dim);line-height:1.6">Mix of Canadian blue-chips (banks/pipelines/utilities) + US Dividend Kings (JNJ, PG, KO, MSFT). US dividends in RRSP avoid 15% withholding tax. DRIP enabled. Projected ~$${(s.projected_25yr/1000).toFixed(0)}K by age ${m.targetAge}.</div>
     </div>
   `;
 }
@@ -313,17 +417,10 @@ function renderTrades() {
   const el = document.getElementById('page-trades');
   const s = STATE.stats;
   el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div class="section-title mono" style="margin:0">BLACK ASP TRADE LOG</div>
-      <span class="mono" style="font-size:10px;font-weight:700;color:${s.total_pnl>=0?'var(--green)':'var(--red)'}">$${s.total_pnl>=0?'+':''}${Math.round(s.total_pnl)}</span>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <canvas id="equity-canvas" height="90"></canvas>
-    </div>
-    <div class="card" style="padding:4px 12px">
-      ${STATE.trades.slice().reverse().map((t,i)=>tradeRow(t, STATE.trades.length-i)).join('')}
-    </div>
-  `;
+    <div class="section-title mono"><span>BLACK ASP TRADE LOG</span>
+    <span class="mono" style="color:${s.total_pnl>=0?'var(--green)':'var(--red)'};font-weight:700">$${s.total_pnl>=0?'+':''}${Math.round(s.total_pnl)}</span></div>
+    <div class="card" style="padding:0;overflow:hidden"><canvas id="equity-canvas" height="90"></canvas></div>
+    <div class="card" style="padding:4px 12px">${STATE.trades.slice().reverse().map((t,i)=>tradeRow(t, STATE.trades.length-i)).join('')}</div>`;
   drawEquityCurve('equity-canvas', s.equity_curve, 90);
 }
 
@@ -331,79 +428,200 @@ function renderStats() {
   const el = document.getElementById('page-stats');
   const s = STATE.stats;
   el.innerHTML = `
-    <div class="section-title mono" style="margin-top:0">BLACK ASP v1.1.0 — PERFORMANCE</div>
+    <div class="section-title mono"><span>BLACK ASP v1.1.0 — PERFORMANCE</span></div>
     <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
       <div class="ring-container">
         <svg viewBox="0 0 80 80" width="80" height="80">
           <circle cx="40" cy="40" r="36" fill="none" stroke="var(--border)" stroke-width="4"/>
-          <circle cx="40" cy="40" r="36" fill="none" stroke="${s.win_rate>=50?'var(--green)':'var(--red)'}" stroke-width="4"
-            stroke-dasharray="${2*Math.PI*36}" stroke-dashoffset="${2*Math.PI*36*(1-s.win_rate/100)}"
-            stroke-linecap="round" transform="rotate(-90 40 40)"/>
+          <circle cx="40" cy="40" r="36" fill="none" stroke="${s.win_rate>=50?'var(--green)':'var(--red)'}" stroke-width="4" stroke-dasharray="${2*Math.PI*36}" stroke-dashoffset="${2*Math.PI*36*(1-s.win_rate/100)}" stroke-linecap="round" transform="rotate(-90 40 40)"/>
         </svg>
-        <div class="ring-text"><span class="ring-pct mono">${Math.round(s.win_rate)}%</span><span class="ring-label">WIN RATE</span></div>
+        <div class="ring-text"><span class="mono" style="font-size:18px;font-weight:700">${Math.round(s.win_rate)}%</span><span style="font-size:8px;color:var(--dim)">WIN RATE</span></div>
       </div>
       <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-        <div class="row">${statCard('TRADES',s.total_trades,'--text')}${statCard('P/F',s.profit_factor.toFixed(2),s.profit_factor>=1?'--green':'--red')}</div>
-        <div class="row">${statCard('AVG WIN','$'+Math.round(s.avg_win),'--green')}${statCard('AVG LOSS','$'+Math.abs(Math.round(s.avg_loss)),'--red')}</div>
+        <div class="row" style="margin:0">${statCard('TRADES',s.total_trades,'--text')}${statCard('P/F',s.profit_factor.toFixed(2),s.profit_factor>=1?'--green':'--red')}</div>
+        <div class="row" style="margin:0">${statCard('AVG WIN','$'+Math.round(s.avg_win),'--green')}${statCard('AVG LOSS','$'+Math.abs(Math.round(s.avg_loss)),'--red')}</div>
       </div>
     </div>
-    <div class="row" style="margin-bottom:12px">
+    <div class="row">
       ${statCard('TOTAL PNL','$'+(s.total_pnl>=0?'+':'')+Math.round(s.total_pnl),s.total_pnl>=0?'--green':'--red',(s.total_pnl/s.total_trades).toFixed(1)+'/trade')}
-      ${statCard('WINS',s.wins+'W','--green','$'+Math.round(s.wins>0?s.avg_win*s.wins:0)+' total')}
-      ${statCard('LOSSES',s.losses+'L','--red','$'+Math.abs(Math.round(s.losses>0?s.avg_loss*s.losses:0))+' total')}
+      ${statCard('LONG',Math.round(s.long_win_rate)+'%','--green',s.long_trades+' trades')}
+      ${statCard('SHORT',Math.round(s.short_win_rate)+'%','--red',s.short_trades+' trades')}
     </div>
-    <div class="section-title mono">BY DIRECTION</div>
-    <div class="row" style="margin-bottom:12px">
-      ${statCard('LONG',Math.round(s.long_win_rate)+'%','--green',s.long_trades+' trades · $'+Math.round(s.long_pnl))}
-      ${statCard('SHORT',Math.round(s.short_win_rate)+'%','--red',s.short_trades+' trades · $'+Math.round(s.short_pnl))}
-    </div>
-    <div class="section-title mono">BY WEEK</div>
+    <div class="section-title mono"><span>BY WEEK</span></div>
     <div class="card">
-      ${s.weekly.map((w,i)=>`
-        <div class="weekly-row"${i===s.weekly.length-1?' style="border-bottom:none"':''}>
-          <div><div class="weekly-name mono">${w.week}</div>
-          <div class="weekly-detail mono">${w.trades} trades · ${w.wins}W ${w.trades-w.wins}L · ${Math.round(w.wins/w.trades*100)}%</div></div>
-          <div class="weekly-pnl mono" style="color:${w.pnl>=0?'var(--green)':'var(--red)'}">${w.pnl>=0?'+':''}$${Math.round(w.pnl)}</div>
-        </div>
-      `).join('')}
+      ${s.weekly.map((w,i)=>`<div class="weekly-row"${i===s.weekly.length-1?' style="border-bottom:none"':''}>
+        <div><div class="mono" style="font-size:10px;color:var(--text)">${w.week}</div>
+        <div class="mono" style="font-size:9px;color:var(--dim)">${w.trades} trades · ${w.wins}W ${w.trades-w.wins}L · ${Math.round(w.wins/w.trades*100)}%</div></div>
+        <div class="mono" style="font-size:12px;font-weight:700;color:${w.pnl>=0?'var(--green)':'var(--red)'}">${w.pnl>=0?'+':''}$${Math.round(w.pnl)}</div>
+      </div>`).join('')}
     </div>
     <div class="insight" style="background:rgba(241,196,15,.05);border:1px solid rgba(241,196,15,.12)">
-      <div class="insight-title mono" style="color:var(--gold)">INSIGHT</div>
-      <div class="insight-text">Week 1 had strong directional trend (selloff) — 67% WR, +$1,531. Weeks 2-4 were choppy/ranging. VIX filter + BGL confluence now active in v1.1.0 to skip chop.</div>
-    </div>
-  `;
+      <div class="mono" style="font-size:10px;font-weight:700;color:var(--gold);margin-bottom:4px">INSIGHT</div>
+      <div style="font-size:10px;color:var(--dim);line-height:1.5">Week 1: strong trend, 67% WR, +$1,531. Weeks 2-4: chop killed it. v1.1.0 VIX + BGL filters now skip unfavorable regimes.</div>
+    </div>`;
 }
 
-// ── HTML Helpers ────────────────────────────────────────────────────
-function signalCard(name, signal, conf, desc, active) {
-  const sc = !signal ? 'var(--gold)' : signal==='LONG' ? 'var(--green)' : 'var(--red)';
+// ═══ RRSP MODAL ═══
+function openRrspModal(id) {
+  const modal = document.getElementById('rrsp-modal');
+  const delBtn = document.getElementById('rrsp-delete-btn');
+  ['rrsp-ticker','rrsp-name','rrsp-sector','rrsp-shares','rrsp-avgCost','rrsp-price','rrsp-yield','rrsp-growth','rrsp-divPerShare','rrsp-note'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('rrsp-id').value='';
+  if (id) {
+    const h = STATE.rrsp.holdings.find(x => x.id === id);
+    if (!h) return;
+    document.getElementById('rrsp-modal-title').textContent = 'Edit ' + h.ticker;
+    delBtn.style.display = 'block';
+    document.getElementById('rrsp-id').value = h.id;
+    document.getElementById('rrsp-ticker').value = h.ticker;
+    document.getElementById('rrsp-country').value = h.country;
+    document.getElementById('rrsp-name').value = h.name;
+    document.getElementById('rrsp-sector').value = h.sector;
+    document.getElementById('rrsp-rating').value = h.rating;
+    document.getElementById('rrsp-shares').value = h.shares;
+    document.getElementById('rrsp-avgCost').value = h.avgCost;
+    document.getElementById('rrsp-price').value = h.price;
+    document.getElementById('rrsp-yield').value = h.yield;
+    document.getElementById('rrsp-growth').value = h.growth;
+    document.getElementById('rrsp-divPerShare').value = h.divPerShare;
+    document.getElementById('rrsp-note').value = h.note;
+  } else {
+    document.getElementById('rrsp-modal-title').textContent = 'Add Holding';
+    delBtn.style.display = 'none';
+  }
+  modal.classList.add('show');
+}
+
+async function saveRrsp() {
+  const idVal = document.getElementById('rrsp-id').value;
+  const data = {
+    ticker: document.getElementById('rrsp-ticker').value.toUpperCase(),
+    country: document.getElementById('rrsp-country').value,
+    name: document.getElementById('rrsp-name').value,
+    sector: document.getElementById('rrsp-sector').value,
+    rating: document.getElementById('rrsp-rating').value,
+    shares: parseFloat(document.getElementById('rrsp-shares').value) || 0,
+    avgCost: parseFloat(document.getElementById('rrsp-avgCost').value) || 0,
+    price: parseFloat(document.getElementById('rrsp-price').value) || 0,
+    yield: parseFloat(document.getElementById('rrsp-yield').value) || 0,
+    growth: parseFloat(document.getElementById('rrsp-growth').value) || 0,
+    divPerShare: parseFloat(document.getElementById('rrsp-divPerShare').value) || 0,
+    note: document.getElementById('rrsp-note').value
+  };
+  if (idVal) data.id = parseInt(idVal);
+  await fetch(API+'/api/rrsp/holding', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+  closeModal('rrsp-modal');
+  await fetchData();
+}
+
+async function deleteHolding() {
+  const idVal = document.getElementById('rrsp-id').value;
+  if (!idVal || !confirm('Delete this holding?')) return;
+  await fetch(API+'/api/rrsp/holding/'+idVal, {method:'DELETE'});
+  closeModal('rrsp-modal');
+  await fetchData();
+}
+
+function openMetaModal() {
+  const m = STATE.rrsp.meta;
+  document.getElementById('meta-monthly').value = m.monthlyContribution;
+  document.getElementById('meta-age').value = m.targetAge;
+  document.getElementById('meta-years').value = m.yearsToTarget;
+  document.getElementById('rrsp-meta-modal').classList.add('show');
+}
+
+async function saveMeta() {
+  const data = {
+    monthlyContribution: parseFloat(document.getElementById('meta-monthly').value) || 50,
+    targetAge: parseInt(document.getElementById('meta-age').value) || 65,
+    yearsToTarget: parseInt(document.getElementById('meta-years').value) || 25
+  };
+  await fetch(API+'/api/rrsp/meta', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+  closeModal('rrsp-meta-modal');
+  await fetchData();
+}
+
+// ═══ SWING MODAL ═══
+function openSwingModal(ticker) {
+  const modal = document.getElementById('swing-modal');
+  const delBtn = document.getElementById('swing-delete-btn');
+  STATE.editingTicker = ticker || null;
+  ['swing-ticker','swing-name','swing-price','swing-score','swing-tp','swing-sl','swing-rr','swing-note'].forEach(id=>document.getElementById(id).value='');
+  if (ticker) {
+    const t = STATE.swing.find(x => x.ticker === ticker);
+    if (!t) return;
+    document.getElementById('swing-modal-title').textContent = 'Edit ' + t.ticker;
+    delBtn.style.display = 'block';
+    document.getElementById('swing-ticker').value = t.ticker;
+    document.getElementById('swing-ticker').readOnly = true;
+    document.getElementById('swing-name').value = t.name || '';
+    document.getElementById('swing-signal').value = t.signal;
+    document.getElementById('swing-price').value = t.price;
+    document.getElementById('swing-score').value = t.score;
+    document.getElementById('swing-trend').value = t.trend;
+    document.getElementById('swing-tp').value = t.tp;
+    document.getElementById('swing-sl').value = t.sl;
+    document.getElementById('swing-rr').value = t.rr;
+    document.getElementById('swing-note').value = t.note || '';
+  } else {
+    document.getElementById('swing-modal-title').textContent = 'Add Ticker';
+    delBtn.style.display = 'none';
+    document.getElementById('swing-ticker').readOnly = false;
+  }
+  modal.classList.add('show');
+}
+
+async function saveSwing() {
+  const data = {
+    ticker: document.getElementById('swing-ticker').value.toUpperCase(),
+    name: document.getElementById('swing-name').value,
+    signal: document.getElementById('swing-signal').value,
+    price: parseFloat(document.getElementById('swing-price').value) || 0,
+    score: parseInt(document.getElementById('swing-score').value) || 0,
+    trend: document.getElementById('swing-trend').value,
+    tp: parseFloat(document.getElementById('swing-tp').value) || 0,
+    sl: parseFloat(document.getElementById('swing-sl').value) || 0,
+    rr: document.getElementById('swing-rr').value,
+    note: document.getElementById('swing-note').value
+  };
+  await fetch(API+'/api/swing/ticker', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+  closeModal('swing-modal');
+  await fetchData();
+}
+
+async function deleteSwing() {
+  const ticker = STATE.editingTicker;
+  if (!ticker || !confirm('Delete '+ticker+'?')) return;
+  await fetch(API+'/api/swing/ticker/'+ticker, {method:'DELETE'});
+  closeModal('swing-modal');
+  await fetchData();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ═══ HELPERS ═══
+function signalCard(name, sig, conf, desc, active) {
+  const sc = !sig ? 'var(--gold)' : sig==='LONG' ? 'var(--green)' : 'var(--red)';
   return `<div class="card signal${active?' active':''}" style="${active?'border-color:'+sc+'33':''}">
     ${active?`<div class="signal-bar" style="background:linear-gradient(90deg,transparent,${sc},transparent)"></div>`:''}
-    <div class="signal-head">
-      <div class="signal-name">${name}</div>
-      <div class="signal-badge mono" style="color:${sc};background:${sc}18">${signal||'FLAT'}</div>
-    </div>
+    <div class="signal-head"><div class="signal-name">${name}</div>
+    <div class="signal-badge mono" style="color:${sc};background:${sc}18">${sig||'FLAT'}</div></div>
     <div class="signal-desc">${desc}</div>
-    ${conf!=null?`<div style="display:flex;align-items:center;gap:6px">
-      <div class="conf-bar-bg"><div class="conf-bar-fill" style="width:${conf}%;background:${sc}"></div></div>
-      <span class="mono" style="font-size:9px;color:var(--dim)">${conf}%</span>
-    </div>`:''}
+    ${conf!=null?`<div style="display:flex;align-items:center;gap:6px"><div class="conf-bar-bg"><div class="conf-bar-fill" style="width:${conf}%;background:${sc}"></div></div><span class="mono" style="font-size:9px;color:var(--dim)">${conf}%</span></div>`:''}
   </div>`;
 }
 
 function statCard(label, value, colorVar, sub) {
   return `<div class="stat-card"><div class="stat-label mono">${label}</div>
-    <div class="stat-value mono" style="color:var(${colorVar})">${value}</div>
-    ${sub?`<div class="stat-sub mono">${sub}</div>`:''}
-  </div>`;
+  <div class="stat-value mono" style="color:var(${colorVar})">${value}</div>
+  ${sub?`<div class="stat-sub mono">${sub}</div>`:''}</div>`;
 }
 
 function indBadge(label, value, colorVar) {
   return `<div class="ind-badge" style="background:var(${colorVar})10;border:1px solid var(${colorVar})25">
-    <div class="ind-dot" style="background:var(${colorVar})"></div>
-    <span class="ind-label mono">${label}</span>
-    <span class="ind-value mono" style="color:var(${colorVar})">${value}</span>
-  </div>`;
+  <div class="ind-dot" style="background:var(${colorVar})"></div>
+  <span class="mono" style="font-size:9px;color:var(--dim)">${label}</span>
+  <span class="mono" style="font-size:9px;font-weight:600;color:var(${colorVar})">${value}</span></div>`;
 }
 
 function tradeRow(t, idx) {
@@ -411,127 +629,96 @@ function tradeRow(t, idx) {
   const dc = t.dir==='LONG' ? '--green' : '--red';
   return `<div class="trade-row">
     <div class="trade-idx mono" style="color:var(${w?'--green':'--red'});background:var(${w?'--green':'--red'})18">${idx}</div>
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;gap:6px;align-items:center">
-        <span class="trade-dir mono" style="color:var(${dc});background:var(${dc})18">${t.dir}</span>
-        <span class="trade-date mono">${t.date}</span>
-      </div>
-      <div class="trade-levels mono">${t.entry.toFixed(2)} → ${t.exit.toFixed(2)}</div>
-    </div>
-    <div class="trade-pnl mono" style="color:var(${w?'--green':'--red'})">${w?'+':''}$${Math.round(t.pnl)}</div>
+    <div style="flex:1;min-width:0"><div style="display:flex;gap:6px;align-items:center">
+    <span class="trade-dir mono" style="color:var(${dc});background:var(${dc})18">${t.dir}</span>
+    <span class="mono" style="font-size:10px;color:var(--dim)">${t.date}</span></div>
+    <div class="mono" style="font-size:9px;color:var(--muted);margin-top:2px">${t.entry.toFixed(2)} → ${t.exit.toFixed(2)}</div></div>
+    <div class="mono" style="font-size:13px;font-weight:700;color:var(${w?'--green':'--red'})">${w?'+':''}$${Math.round(t.pnl)}</div>
   </div>`;
 }
 
-// ── Canvas Drawing ─────────────────────────────────────────────────
 function generateCandles(n) {
-  const candles = [];
-  let p = 6800;
+  const c = []; let p = 6800;
   for (let i=0;i<n;i++) {
     const o = p + (Math.random()-.48)*15;
-    const c = o + (Math.random()-.48)*20;
-    const h = Math.max(o,c)+Math.random()*10;
-    const l = Math.min(o,c)-Math.random()*10;
-    candles.push({o,h,l,c,t:i});
-    p = c;
-  }
-  return candles;
+    const cl = o + (Math.random()-.48)*20;
+    const h = Math.max(o,cl)+Math.random()*10;
+    const l = Math.min(o,cl)-Math.random()*10;
+    c.push({o,h,l,c:cl,t:i}); p = cl;
+  } return c;
 }
 
 function drawCandlestickChart(id, candles, height) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
+  const canvas = document.getElementById(id); if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const w = canvas.parentElement.clientWidth;
   canvas.width = w * dpr; canvas.height = height * dpr;
   canvas.style.width = w+'px'; canvas.style.height = height+'px';
   ctx.scale(dpr, dpr);
-  
   const pad = {t:10,r:8,b:20,l:45};
   const cw = w-pad.l-pad.r, ch = height-pad.t-pad.b;
   const allP = candles.flatMap(c=>[c.h,c.l]);
-  const minP = Math.min(...allP), maxP = Math.max(...allP);
-  const range = maxP-minP||1;
+  const minP = Math.min(...allP), maxP = Math.max(...allP), range = maxP-minP||1;
   const gap = cw/candles.length, candleW = Math.max(2, gap*.7);
   const toY = p => pad.t+ch-((p-minP)/range)*ch;
-  
-  // Grid
   ctx.strokeStyle='#1a1a28'; ctx.lineWidth=.5;
-  ctx.font='9px SFMono-Regular,monospace'; ctx.fillStyle='#3d3d50'; ctx.textAlign='right';
-  for(let i=0;i<5;i++){
-    const p=minP+(range/4)*i, y=toY(p);
+  ctx.font='9px monospace'; ctx.fillStyle='#3d3d50'; ctx.textAlign='right';
+  for(let i=0;i<5;i++){ const p=minP+(range/4)*i, y=toY(p);
     ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
     ctx.fillText(p.toFixed(0),pad.l-4,y+3);
   }
-  
-  // EMA 21
   const k=2/22; let ema=[candles[0].c];
   for(let i=1;i<candles.length;i++) ema.push(candles[i].c*k+ema[i-1]*(1-k));
   ctx.beginPath(); ctx.strokeStyle='#00e67699'; ctx.lineWidth=1.5;
-  ema.forEach((v,i)=>{const x=pad.l+i*gap+gap/2;i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v))});
+  ema.forEach((v,i)=>{const x=pad.l+i*gap+gap/2; i===0?ctx.moveTo(x,toY(v)):ctx.lineTo(x,toY(v))});
   ctx.stroke();
-  
-  // Candles
   candles.forEach((c,i)=>{
-    const x=pad.l+i*gap+gap/2;
-    const bull=c.c>=c.o; const col=bull?'#2ecc71':'#e74c3c';
+    const x=pad.l+i*gap+gap/2; const bull=c.c>=c.o; const col=bull?'#2ecc71':'#e74c3c';
     ctx.strokeStyle=col;ctx.lineWidth=.8;
     ctx.beginPath();ctx.moveTo(x,toY(c.h));ctx.lineTo(x,toY(c.l));ctx.stroke();
     const bt=toY(Math.max(c.o,c.c)),bb=toY(Math.min(c.o,c.c));
     ctx.fillStyle=col;ctx.globalAlpha=.9;
     ctx.fillRect(x-candleW/2,bt,candleW,Math.max(1,bb-bt));ctx.globalAlpha=1;
   });
-  
-  // Price line
   const last=candles[candles.length-1], py=toY(last.c);
   ctx.setLineDash([3,3]);ctx.strokeStyle='#f1c40f';ctx.lineWidth=.5;
   ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#f1c40f';
   const lw=44,lh=14;ctx.fillRect(w-pad.r-lw,py-lh/2,lw,lh);
-  ctx.fillStyle='#000';ctx.font='bold 8px SFMono-Regular,monospace';ctx.textAlign='center';
+  ctx.fillStyle='#000';ctx.font='bold 8px monospace';ctx.textAlign='center';
   ctx.fillText(last.c.toFixed(1),w-pad.r-lw/2,py+3);
 }
 
 function drawEquityCurve(id, curve, height) {
-  const canvas = document.getElementById(id);
-  if (!canvas) return;
+  const canvas = document.getElementById(id); if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const w = canvas.parentElement.clientWidth;
   canvas.width = w*dpr; canvas.height = height*dpr;
   canvas.style.width = w+'px'; canvas.style.height = height+'px';
   ctx.scale(dpr, dpr);
-  
   const pad=8, cw=w-pad*2, ch=height-pad*2;
   const pts=[0,...curve];
   const minE=Math.min(...pts),maxE=Math.max(...pts),range=maxE-minE||1;
   const final=pts[pts.length-1], pos=final>=0;
   const toX=i=>pad+(i/(pts.length-1))*cw;
   const toY=v=>pad+ch-((v-minE)/range)*ch;
-  
-  // Zero line
   ctx.setLineDash([2,2]);ctx.strokeStyle='#3d3d50';ctx.lineWidth=.5;
   ctx.beginPath();ctx.moveTo(pad,toY(0));ctx.lineTo(w-pad,toY(0));ctx.stroke();ctx.setLineDash([]);
-  
-  // Line
   ctx.beginPath();ctx.strokeStyle=pos?'#2ecc71':'#e74c3c';ctx.lineWidth=1.5;
   pts.forEach((v,i)=>{i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v))});ctx.stroke();
-  
-  // Peak dot
   const pi=pts.indexOf(maxE);
   ctx.beginPath();ctx.arc(toX(pi),toY(maxE),3,0,Math.PI*2);ctx.fillStyle='#f1c40f';ctx.fill();
-  
-  // Labels
-  ctx.font='8px SFMono-Regular,monospace';ctx.textAlign='left';ctx.fillStyle='#6b6b80';
+  ctx.font='8px monospace';ctx.textAlign='left';ctx.fillStyle='#6b6b80';
   ctx.fillText('Peak: $'+Math.round(maxE),pad+2,pad+10);
   ctx.textAlign='right';ctx.fillStyle=pos?'#2ecc71':'#e74c3c';
   ctx.fillText('Now: $'+Math.round(final),w-pad-2,height-pad-2);
 }
 
-// ── Init ───────────────────────────────────────────────────────────
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 fetchData();
-setInterval(fetchData, 30000); // refresh every 30s
+setInterval(fetchData, 30000);
 </script>
 </body>
 </html>
